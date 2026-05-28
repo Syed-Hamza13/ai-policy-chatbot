@@ -39,17 +39,20 @@ function ChatInput({ onSend }) {
       <div className="max-w-3xl mx-auto">
         <div
           className="
-            flex
-            items-end
-            gap-3
-            dark:bg-zinc-900
-bg-white
+  flex
+  items-end
+  gap-3
+  rounded-3xl
+  border
+  px-4
+  py-3
 
-dark:border-zinc-800
-border-zinc-300
-            px-4
-            py-3
-          "
+  dark:bg-zinc-900
+  bg-white
+
+  dark:border-zinc-800
+  border-zinc-300
+"
         >
           <textarea
             ref={textareaRef}
@@ -63,7 +66,8 @@ border-zinc-300
               bg-transparent
               outline-none
               resize-none
-              text-white
+             dark:text-white
+text-zinc-900
               placeholder:text-zinc-500
               text-sm
               leading-6

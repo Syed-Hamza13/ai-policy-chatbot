@@ -37,7 +37,7 @@ function ChatPage() {
   };
 
   return (
-    <div className="w-full h-screen bg-zinc-950 flex flex-col">
+    <div className="w-full h-screen dark:bg-zinc-950 bg-zinc-100 flex flex-col">
 
       <ChatHeader />
 
