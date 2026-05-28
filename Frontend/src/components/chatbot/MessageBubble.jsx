@@ -15,7 +15,7 @@ function MessageBubble({ message, sender }) {
         <div
           className="
             max-w-[75%]
-            bg-blue-600
+            bg-emerald-700
             text-white
             px-4
             py-3
@@ -45,7 +45,7 @@ function MessageBubble({ message, sender }) {
               onClick={() => setExpanded(!expanded)}
               className="
                 mt-2
-                text-blue-100
+                text-emerald-100
                 text-xs
                 hover:text-white
                 transition
