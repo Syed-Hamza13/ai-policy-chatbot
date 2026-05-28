@@ -1,9 +1,84 @@
+import { useRef, useState } from "react";
+import { Upload, FileText, Trash2 } from "lucide-react";
+
+import axios from "axios";
+
 function UploadSection() {
+
+  const inputRef = useRef(null);
+
+  const [files, setFiles] = useState([]);
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleFiles = async (selectedFiles) => {
+
+  const fileArray = Array.from(selectedFiles);
+
+  const formData = new FormData();
+
+  fileArray.forEach((file) => {
+
+    formData.append("files", file);
+  });
+
+  setUploading(true);
+
+  try {
+
+    const response = await axios.post(
+
+      "http://localhost:7578/upload",
+
+      formData,
+
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    const uploadedFiles =
+      response.data.files.map((file) => ({
+
+        id: crypto.randomUUID(),
+
+        name: file.originalname,
+
+        size: (file.size / 1024).toFixed(2),
+
+        status: "Indexed",
+      }));
+
+    setFiles((prev) => [
+
+      ...prev,
+
+      ...uploadedFiles,
+    ]);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Upload failed");
+  }
+
+  setUploading(false);
+};
+  const handleRemove = (id) => {
+
+    setFiles((prev) =>
+      prev.filter((file) => file.id !== id)
+    );
+  };
 
   return (
     <div className="
       rounded-2xl
       border
+
       dark:border-zinc-800
       border-zinc-200
 
@@ -16,6 +91,7 @@ function UploadSection() {
       <h2 className="
         text-lg
         font-semibold
+
         dark:text-white
         text-zinc-900
       ">
@@ -25,48 +101,221 @@ function UploadSection() {
       <p className="
         mt-1
         text-sm
+
         dark:text-zinc-400
         text-zinc-500
       ">
-        Upload DOC or TXT files for AI policy indexing.
+        Upload DOC, DOCX or TXT files for AI indexing.
       </p>
 
-      <div className="
-        mt-6
-        border-2
-        border-dashed
+      <div
+        onClick={() => inputRef.current.click()}
+        className="
+          mt-6
+          border-2
+          border-dashed
 
-        dark:border-zinc-700
-        border-zinc-300
+          dark:border-zinc-700
+          border-zinc-300
 
-        rounded-2xl
-        p-10
-        text-center
-      ">
+          rounded-2xl
+          p-10
+          text-center
+          cursor-pointer
+
+          hover:border-emerald-500
+          transition
+        "
+      >
+
+        <input
+          type="file"
+          multiple
+          hidden
+          ref={inputRef}
+          onChange={(e) =>
+            handleFiles(e.target.files)
+          }
+        />
+
+        <div className="flex justify-center">
+
+          <div className="
+            p-4
+            rounded-2xl
+
+            dark:bg-zinc-800
+            bg-zinc-100
+          ">
+            <Upload className="w-8 h-8 text-emerald-500" />
+          </div>
+
+        </div>
 
         <p className="
-          dark:text-zinc-300
+          mt-4
+
+          dark:text-zinc-200
           text-zinc-700
         ">
-          Drag and drop policy documents here
+          Click to upload policy documents
         </p>
 
-        <button className="
-          mt-4
-          px-5
-          py-2.5
-          rounded-xl
+        <p className="
+          mt-2
+          text-sm
 
-          bg-emerald-600
-          hover:bg-emerald-700
-
-          text-white
-          transition
+          dark:text-zinc-500
+          text-zinc-400
         ">
-          Choose Files
-        </button>
+          Supports multiple files
+        </p>
 
       </div>
+
+      {/* Loading */}
+
+      {uploading && (
+
+        <div className="
+          mt-6
+          flex
+          items-center
+          gap-3
+        ">
+
+          <div className="
+            w-5
+            h-5
+            border-2
+            border-emerald-500
+            border-t-transparent
+            rounded-full
+            animate-spin
+          "></div>
+
+          <p className="
+            text-sm
+
+            dark:text-zinc-300
+            text-zinc-600
+          ">
+            Uploading and indexing documents...
+          </p>
+
+        </div>
+
+      )}
+
+      {/* Uploaded Files */}
+
+      {files.length > 0 && (
+
+        <div className="mt-8 space-y-3">
+
+          <h3 className="
+            text-sm
+            font-medium
+
+            dark:text-zinc-300
+            text-zinc-700
+          ">
+            Uploaded Documents
+          </h3>
+
+          {files.map((file) => (
+
+            <div
+              key={file.id}
+              className="
+                flex
+                items-center
+                justify-between
+
+                rounded-xl
+                border
+
+                dark:border-zinc-800
+                border-zinc-200
+
+                dark:bg-zinc-800
+                bg-zinc-50
+
+                p-4
+              "
+            >
+
+              <div className="flex items-center gap-3">
+
+                <FileText className="
+                  w-5
+                  h-5
+                  text-emerald-500
+                " />
+
+                <div>
+
+                  <p className="
+                    text-sm
+                    font-medium
+
+                    dark:text-white
+                    text-zinc-900
+                  ">
+                    {file.name}
+                  </p>
+
+                  <p className="
+                    text-xs
+
+                    dark:text-zinc-400
+                    text-zinc-500
+                  ">
+                    {file.size} KB
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="flex items-center gap-4">
+
+                <span className="
+                  text-xs
+                  px-3
+                  py-1
+                  rounded-full
+
+                  bg-emerald-100
+                  text-emerald-700
+                ">
+                  {file.status}
+                </span>
+
+                <button
+                  onClick={() =>
+                    handleRemove(file.id)
+                  }
+                  className="
+                    dark:text-zinc-400
+                    text-zinc-500
+
+                    hover:text-red-500
+                    transition
+                  "
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
 
     </div>
   );
