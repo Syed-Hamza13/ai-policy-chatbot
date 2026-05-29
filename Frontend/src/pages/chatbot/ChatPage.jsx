@@ -14,26 +14,64 @@ function ChatPage() {
     },
   ]);
 
-  const handleSend = (text) => {
+  const handleSend = async (text) => {
 
+    if (!text.trim()) return;
+
+    // User message
     const userMessage = {
       sender: "user",
       message: text,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+    ]);
 
-    setTimeout(() => {
+    try {
 
-      const aiResponse = {
+      // Backend API call
+      const response = await fetch(
+        "http://127.0.0.1:8000/query/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: text,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      // AI response
+      const botMessage = {
         sender: "assistant",
-        message:
-          "According to company policy section 3.2, temporary employees require manager approval before overtime claims.",
+        message: data.answer,
       };
 
-      setMessages((prev) => [...prev, aiResponse]);
+      setMessages((prev) => [
+        ...prev,
+        botMessage,
+      ]);
 
-    }, 1200);
+    } catch (error) {
+
+      console.error(error);
+
+      const errorMessage = {
+        sender: "assistant",
+        message: "Error connecting to backend.",
+      };
+
+      setMessages((prev) => [
+        ...prev,
+        errorMessage,
+      ]);
+    }
   };
 
   return (

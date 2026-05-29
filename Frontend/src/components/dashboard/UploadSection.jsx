@@ -13,60 +13,60 @@ function UploadSection() {
 
   const handleFiles = async (selectedFiles) => {
 
-  const fileArray = Array.from(selectedFiles);
+    const fileArray = Array.from(selectedFiles);
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  fileArray.forEach((file) => {
+    // Single PDF upload
+    formData.append("file", fileArray[0]);
 
-    formData.append("files", file);
-  });
+    setUploading(true);
 
-  setUploading(true);
+    try {
 
-  try {
+      const response = await axios.post(
 
-    const response = await axios.post(
+        "http://127.0.0.1:8000/upload/",
 
-      "http://localhost:7578/upload",
+        formData,
 
-      formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      console.log(response.data);
 
-    const uploadedFiles =
-      response.data.files.map((file) => ({
+      const uploadedFile = {
 
         id: crypto.randomUUID(),
 
-        name: file.originalname,
+        name: fileArray[0].name,
 
-        size: (file.size / 1024).toFixed(2),
+        size: (
+          fileArray[0].size / 1024
+        ).toFixed(2),
 
         status: "Indexed",
-      }));
+      };
 
-    setFiles((prev) => [
+      setFiles((prev) => [
+        ...prev,
+        uploadedFile,
+      ]);
 
-      ...prev,
+    } catch (error) {
 
-      ...uploadedFiles,
-    ]);
+      console.error(error);
 
-  } catch (error) {
+      alert("Upload failed");
+    }
 
-    console.error(error);
+    setUploading(false);
+  };
 
-    alert("Upload failed");
-  }
-
-  setUploading(false);
-};
   const handleRemove = (id) => {
 
     setFiles((prev) =>
@@ -105,7 +105,7 @@ function UploadSection() {
         dark:text-zinc-400
         text-zinc-500
       ">
-        Upload DOC, DOCX or TXT files for AI indexing.
+        Upload PDF files for AI indexing.
       </p>
 
       <div
@@ -130,7 +130,7 @@ function UploadSection() {
 
         <input
           type="file"
-          multiple
+          accept=".pdf"
           hidden
           ref={inputRef}
           onChange={(e) =>
@@ -158,17 +158,7 @@ function UploadSection() {
           dark:text-zinc-200
           text-zinc-700
         ">
-          Click to upload policy documents
-        </p>
-
-        <p className="
-          mt-2
-          text-sm
-
-          dark:text-zinc-500
-          text-zinc-400
-        ">
-          Supports multiple files
+          Click to upload policy PDF
         </p>
 
       </div>
@@ -200,7 +190,7 @@ function UploadSection() {
             dark:text-zinc-300
             text-zinc-600
           ">
-            Uploading and indexing documents...
+            Uploading and indexing document...
           </p>
 
         </div>
